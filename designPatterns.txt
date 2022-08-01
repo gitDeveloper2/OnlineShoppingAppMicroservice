@@ -1,0 +1,2 @@
+1. Builder Design Pattern
+DTO design Pattern
