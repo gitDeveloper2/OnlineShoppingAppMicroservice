@@ -1,33 +1,38 @@
 package com.example.productservice.MyController;
 
+import brave.messaging.ProducerResponse;
+import com.example.productservice.dto.ProductRequest;
+import com.example.productservice.dto.ProductResponse;
+import com.example.productservice.services.ProductService;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
 import io.github.resilience4j.timelimiter.annotation.TimeLimiter;
+import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
-
+@RequiredArgsConstructor
+@RequestMapping("/api/product")
 @RestController
 public class MyController {
-@CircuitBreaker(name = "inventory",fallbackMethod = "fallback")
-@Retry(name = "inventory")
-@TimeLimiter(name = "inventory")
+    private final ProductService productService;
 
-    @GetMapping("/api/product")
-    public CompletableFuture<String> rest(){
-        return CompletableFuture.supplyAsync(()->slowbehavior());
+    @GetMapping()
+    @ResponseStatus(HttpStatus.OK)
+    public List<ProductResponse> getAllProducts(){
+        return productService.getAllProducts();
     }
-  public CompletableFuture<String> fallback(RuntimeException runtimeException){
-    return CompletableFuture.supplyAsync(() -> "Failed");
-  }
-    @SneakyThrows
-    public String slowbehavior(){
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public void createProduct(@RequestBody ProductRequest productRequest){
+        productService.createProduct(productRequest);
 
-    return "sff";
-  }
+    }
+
 }
